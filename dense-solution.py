@@ -2,7 +2,7 @@ import cv2 as cv
 import numpy as np
 
 # The video feed is read in as a VideoCapture object
-cap = cv.VideoCapture("shibuya.mp4")
+cap = cv.VideoCapture("teslauto1.mp4")
 # ret = a boolean return value from getting the frame, first_frame = the first frame in the entire video sequence
 ret, first_frame = cap.read()
 # Converts frame to grayscale because we only need the luminance channel for detecting edges - less computationally expensive

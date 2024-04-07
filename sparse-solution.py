@@ -2,11 +2,11 @@ import cv2 as cv
 import numpy as np
 
 # Parameters for Shi-Tomasi corner detection
-feature_params = dict(maxCorners = 10, qualityLevel = 0.2, minDistance = 2, blockSize = 7)
+feature_params = dict(maxCorners = 200, qualityLevel = 0.2, minDistance = 2, blockSize = 7)
 # Parameters for Lucas-Kanade optical flow
 lk_params = dict(winSize = (15,15), maxLevel = 2, criteria = (cv.TERM_CRITERIA_EPS | cv.TERM_CRITERIA_COUNT, 10, 0.03))
 # The video feed is read in as a VideoCapture object
-cap = cv.VideoCapture("landing.mp4")
+cap = cv.VideoCapture("teslauto1.mp4")
 # Variable for color to draw optical flow track
 color = (0, 255, 0)
 # ret = a boolean return value from getting the frame, first_frame = the first frame in the entire video sequence
