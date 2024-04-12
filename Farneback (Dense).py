@@ -3,12 +3,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pyrealsense2 as rs
 
-#K = np.array([[385.5986022949219, 0.0, 326.3680419921875],
-#              [0.0, 385.1598815917969, 242.12353515625],
-#              [0.0, 0.0, 1.0]])
+#Intel Realsense D455 Intrinsic
 fx = 385.5986022949219
 fy = 385.1598815917969
 fps = 30
+
+#Depth
 Z = 2.0
 
 pipeline = rs.pipeline()
