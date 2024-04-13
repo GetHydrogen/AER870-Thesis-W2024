@@ -2,6 +2,7 @@ import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
 import pyrealsense2 as rs
+import csv
 
 #Intel Realsense D455 Intrinsic
 fx = 385.5986022949219
@@ -11,6 +12,7 @@ fps = 30
 #Depth
 Z = 2.0
 
+
 pipeline = rs.pipeline()
 config = rs.config()
 config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
@@ -18,6 +20,10 @@ config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
 pipeline.start(config)
 
 velocities_data = []
+
+# Define the codec and create VideoWriter object
+fourcc = cv.VideoWriter_fourcc(*'XVID')
+out = cv.VideoWriter('FbDs.avi', fourcc, 5, (640, 480), isColor=True)
 
 try:
     for _ in range(30):
@@ -56,7 +62,8 @@ try:
         cv.putText(rgb, f"Velocity: {velocity:.2f} m/s", (10, 30), cv.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2, cv.LINE_AA)
         cv.imshow('Dense Optical Flow', rgb)
         
-        
+        out.write(rgb)
+
         prev_gray = gray
 
         if cv.waitKey(1) & 0xFF == ord('q'):
@@ -64,8 +71,17 @@ try:
 finally:
     pipeline.stop()
     cv.destroyAllWindows()
+    out.release()
+
+    with open('FbDs_data.csv', 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(['Frame', 'Velocity (m/s)'])
+        for i, velocity in enumerate(velocities_data):
+            writer.writerow([i, velocity])
+
     plt.figure()
     plt.plot(velocities_data)
-    plt.title("Drone Velocity Scatters")
+    #plt.title("Drone Velocity Scatters")
     plt.ylabel("Velocity (m/s)")
-    plt.show()
+    plt.savefig('FbDs_plot.png')
+    #plt.show()

@@ -2,15 +2,23 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 import pyrealsense2 as rs
+import csv
+import os
 
 velocities_data = []
+video_counter = 1
 
 def run_tracking(pipeline, fx, fy, fps, Z):
-    global velocities_data
+    video_counter = len(os.listdir('Videos/'))+1
 
     lk_hp = dict(winSize=(15, 15), maxLevel=2, criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))
     features_hp = dict(maxCorners=10, qualityLevel=0.3, minDistance=7, blockSize=7)
     color = np.random.randint(0, 255, (10, 3))
+
+    video_filename = f'Videos/LkSp{video_counter}.avi'
+
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    out = cv2.VideoWriter(video_filename, fourcc, fps, (640, 480))
 
     while True:
         first_frame = pipeline.wait_for_frames().get_color_frame()
@@ -57,14 +65,37 @@ def run_tracking(pipeline, fx, fy, fps, Z):
             cv2.putText(frame_image, f'Vel: {velocity:.2f} m/s', (int(a), int(b)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
 
         img = cv2.add(frame_image, mask)
+        out.write(img)  # Write frame to video file
         cv2.imshow('Frame', img)
         
         
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+        key = cv2.waitKey(1)
+        if key & 0xFF == ord('q'):
+            break  # Exit the loop if 'q' is pressed
 
         old_gray = frame_gray.copy()
         p0 = good_new.reshape(-1, 1, 2)
+
+    # Saving velocities_data as CSV
+    with open('Logs/LkSp_data.csv', 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(['Velocity (m/s)'])
+        for velocity in velocities_data:
+            writer.writerow([velocity])
+
+    out.release()  # Release the video writer
+
+    video_counter += 1
+
+    print("Final velocities:", velocities_data)
+    plt.figure()
+    plt.plot(velocities_data)
+    plt.title("Drone Velocity Scatters")
+    plt.ylabel("Velocity (m/s)")
+    plt.savefig('LkSp_plot.png')
+
+    #plt.show()
+    cv2.destroyAllWindows()
 
 
 def main():
@@ -87,12 +118,7 @@ def main():
     finally:
         pipeline.stop()
         cv2.destroyAllWindows()
-        print("Final velocities:", velocities_data)
-        plt.figure()
-        plt.plot(velocities_data)
-        plt.title("Drone Velocity Scatters")
-        plt.ylabel("Velocity (m/s)")
-        plt.show()
-        
+
+
 if __name__ == "__main__":
     main()
